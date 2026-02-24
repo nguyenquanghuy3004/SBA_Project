@@ -15,12 +15,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String username;
 
     @Column(nullable = false)
     private String password; // Encrypted
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String email;
 
     // Optional: Link to Student info if needed

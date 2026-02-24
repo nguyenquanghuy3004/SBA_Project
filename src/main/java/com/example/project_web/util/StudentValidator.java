@@ -39,14 +39,19 @@ public class StudentValidator {
             throw new AppException("Ngày sinh không được ở tương lai");
         }
 
-        // Kiểm tra trùng lặp thủ công trước khi lưu
-        if (student.getStudentId() == null) {
-            if (studentRepository.existsByStudentEmail(student.getStudentEmail())) {
+        // Kiểm tra trùng lặp (Uniqueness check)
+        // Kiểm tra Email
+        studentRepository.findByStudentEmail(student.getStudentEmail()).ifPresent(existing -> {
+            if (student.getStudentId() == null || student.getStudentId() == 0 || !existing.getStudentId().equals(student.getStudentId())) {
                 throw new AppException("Email đã tồn tại trong hệ thống");
             }
-            if (studentRepository.existsByStudentPhone(student.getStudentPhone())) {
+        });
+
+        // Kiểm tra Số điện thoại
+        studentRepository.findByStudentPhone(student.getStudentPhone()).ifPresent(existing -> {
+            if (student.getStudentId() == null || student.getStudentId() == 0 || !existing.getStudentId().equals(student.getStudentId())) {
                 throw new AppException("Số điện thoại đã tồn tại trong hệ thống");
             }
-        }
+        });
     }
 }

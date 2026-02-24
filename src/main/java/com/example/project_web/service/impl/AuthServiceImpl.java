@@ -7,7 +7,9 @@ import com.example.project_web.dto.RegisterRequest;
 import com.example.project_web.entity.Role;
 import com.example.project_web.entity.User;
 import com.example.project_web.enums.RoleName;
+import com.example.project_web.entity.Student;
 import com.example.project_web.repository.RoleRepository;
+import com.example.project_web.repository.StudentRepository;
 import com.example.project_web.repository.UserRepository;
 import com.example.project_web.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -37,6 +40,9 @@ public class AuthServiceImpl implements AuthService {
     RoleRepository roleRepository;
 
     @Autowired
+    StudentRepository studentRepository;
+
+    @Autowired
     PasswordEncoder encoder;
 
     @Autowired
@@ -44,28 +50,33 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateToken(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateToken(authentication);
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
 
-        // Assuming User ID is accessible via cast or lookup if needed. 
-        // Ideally UserDetails implementation should have getId().
-        // For now finding user from repo to get ID safely.
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
-        Long userId = (user != null) ? user.getId() : null;
-
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userId,
-                userDetails.getUsername(),
-                (user != null) ? user.getEmail() : "",
-                roles));
+            // Get user from DB to get Email and ID
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Error: User not found in database after authentication."));
+            
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    roles));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body("Error: Invalid username or password!");
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the full stack trace for debugging
+            return ResponseEntity.status(500).body("Internal Login Error: " + e.getMessage());
+        }
     }
 
     @Override
@@ -118,7 +129,21 @@ public class AuthServiceImpl implements AuthService {
         }
 
         user.setRoles(roles);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // If the registered user is a student, create a Student profile
+        if (roles.stream().anyMatch(r -> r.getName().equals(RoleName.ROLE_STUDENT))) {
+            Student student = new Student();
+            student.setUser(savedUser);
+            student.setStudentName(savedUser.getUsername());
+            student.setStudentEmail(savedUser.getEmail());
+            student.setGender("Other"); // Default
+            student.setDateOfBirth(java.time.LocalDate.of(2000, 1, 1)); // Default
+            student.setStudentPhone(signUpRequest.getPhone()); 
+            student.setMajor("None"); // Default
+            student.setGpa(0.0);
+            studentRepository.save(student);
+        }
 
         return ResponseEntity.ok("User registered successfully!");
     }

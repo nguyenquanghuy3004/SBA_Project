@@ -1,20 +1,24 @@
 package com.example.project_web.controller;
 
 import com.example.project_web.entity.Student;
+import com.example.project_web.entity.User;
+import com.example.project_web.repository.UserRepository;
 import com.example.project_web.service.StudentService;
 import com.example.project_web.util.StudentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
     @RestController
     @RequestMapping("/api/student")
-    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:5173"}, maxAge = 3600)
     public class StudentController {
 
         @Autowired
@@ -24,7 +28,7 @@ import java.util.List;
         private StudentValidator studentValidator;
 
         @Autowired
-        private com.example.project_web.repository.UserRepository userRepository;
+        private UserRepository userRepository;
 
         @GetMapping
         @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
@@ -49,31 +53,65 @@ import java.util.List;
         }
 
 
+        @GetMapping("/me")
+        @PreAuthorize("hasRole('STUDENT')")
+        public ResponseEntity<Student> getMyProfile(Authentication authentication) {
+            String currentUsername = authentication.getName();
+            
+            User currentUser = userRepository.findByUsername(currentUsername)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            return studentService.getStudentByUserId(currentUser.getId())
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        }
+
         @PutMapping("/update/{id}")
         @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
-        public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Student student, org.springframework.security.core.Authentication authentication) {
-            student.setStudentId(id); // Set ID so Validator knows this is an update
-            studentValidator.validate(student);
+        public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Student student, Authentication authentication) {
+            
+            // BƯỚC 1: Tìm sinh viên cũ trong database
+            Optional<Student> studentOpt = studentService.getStudentById(id);
+            if (studentOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sinh viên ID: " + id);
+            }
+            Student existingStudent = studentOpt.get();
 
-            // Check if requester is a STUDENT
-            boolean isStudent = authentication.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
+            // BƯỚC 2: Kiểm tra quyền chỉnh sửa
+            String authorities = authentication.getAuthorities().toString();
+            String currentUsername = authentication.getName();
 
-            if (isStudent) {
-                // Verify ownership by checking if User email matches Student email
-                org.springframework.security.core.userdetails.UserDetails userDetails = 
-                        (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
+            // Nếu là SINH VIÊN (và không phải Admin/Teacher)
+            if (authorities.contains("ROLE_STUDENT") && !authorities.contains("ROLE_ADMIN") && !authorities.contains("ROLE_TEACHER")) {
                 
-                com.example.project_web.entity.User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
-                java.util.Optional<Student> existingStudentOpt = studentService.getStudentById(id);
+                // Kiểm tra xem sinh viên này có đang sửa "chính mình" không?
+                if (existingStudent.getUser() == null || !existingStudent.getUser().getUsername().equals(currentUsername)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn chỉ có quyền chỉnh sửa hồ sơ của chính mình!");
+                }
 
-                if (currentUser == null || existingStudentOpt.isEmpty() || 
-                    !currentUser.getEmail().equals(existingStudentOpt.get().getStudentEmail())) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this profile.");
+                // Hạn chế: Sinh viên không được tự sửa Điểm (GPA) và Tên (nếu đã có)
+                student.setGpa(existingStudent.getGpa());
+                student.setStudentName(existingStudent.getStudentName());
+                
+                // Cho phép sửa Chuyên ngành và Lớp NẾU hiện tại đang là "None" hoặc trống
+                if (existingStudent.getMajor() != null && !existingStudent.getMajor().equalsIgnoreCase("None") 
+                    && !existingStudent.getMajor().equalsIgnoreCase("Chưa cập nhật")) {
+                    student.setMajor(existingStudent.getMajor());
+                }
+                
+                if (existingStudent.getStudentClass() != null && !existingStudent.getStudentClass().equalsIgnoreCase("None")
+                    && !existingStudent.getStudentClass().equalsIgnoreCase("Chưa cập nhật")
+                    && !existingStudent.getStudentClass().isEmpty()) {
+                    student.setStudentClass(existingStudent.getStudentClass());
                 }
             }
 
-            return ResponseEntity.ok(studentService.updateStudent(id, student));
+            // BƯỚC 3: Validate và lưu dữ liệu
+            student.setStudentId(id);
+            studentValidator.validate(student);
+            
+            Student updatedStudent = studentService.updateStudent(id, student);
+            return ResponseEntity.ok(updatedStudent);
         }
 
 
@@ -83,4 +121,7 @@ import java.util.List;
             studentService.deleteStudent(id);
             return ResponseEntity.noContent().build();
         }
+
+        // Chức năng khác
+
     }

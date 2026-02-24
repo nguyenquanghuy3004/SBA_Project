@@ -9,37 +9,63 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table(name = "students")
-@JsonPropertyOrder({ "studentId", "studentName", "gender", "dateOfBirth", "studentEmail", "studentPhone", "major", "gpa" })
+@JsonPropertyOrder({ "studentId", "user", "studentName", "gender", "dateOfBirth", "studentEmail", "studentPhone", "address", "studentClass", "major", "gpa" })
 public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Student_ID")
+    @Column(name = "student_id")
     private Long studentId;
 
-    @Column(name = "Student_Name", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "student_name", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String studentName;
 
-    @Column(name = "Gender",nullable = false)
+    @Column(name = "gender", nullable = false)
     private String gender;
 
-    @Column(name = "Date_Of_Birthday" ,nullable = false)
+    @Column(name = "date_of_birthday", nullable = false)
     private LocalDate dateOfBirth;
 
-    @Column(name = "Student_Email",nullable = false,unique = true)
+    @Column(name = "student_email", nullable = false, unique = true)
     private String studentEmail;
 
-    @Column(name = "Student_Phone", nullable = false,unique = true)
+    @Column(name = "student_phone", nullable = false, unique = true)
     private String studentPhone;
 
-    @Column(name = "Major",nullable = false)
+    @Column(name = "address", columnDefinition = "NVARCHAR(255)")
+    private String address;
+
+    @Column(name = "student_class", columnDefinition = "NVARCHAR(50)")
+    private String studentClass;
+
+    @Column(name = "major", nullable = false, columnDefinition = "NVARCHAR(255)")
     private String major;
 
-    @Column(name = "Gpa",nullable = false)
+    @Column(name = "gpa", nullable = false)
     private Double gpa;
 
     public Student() {
 
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getStudentClass() {
+        return studentClass;
+    }
+
+    public void setStudentClass(String studentClass) {
+        this.studentClass = studentClass;
     }
 
     public Long getStudentId() {
@@ -48,6 +74,14 @@ public class Student {
 
     public void setStudentId(Long studentId) {
         this.studentId = studentId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getStudentName() {

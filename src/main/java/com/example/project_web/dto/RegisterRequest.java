@@ -6,7 +6,16 @@ public class RegisterRequest {
     private String username;
     private String email;
     private String password;
+    private String phone;
     private Set<String> role;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
     public String getUsername() {
         return username;

@@ -22,6 +22,10 @@ public class StudentService {
         return studentRepository.findById(id);
     }
 
+    public Optional<Student> getStudentByUserId(Long userId){
+        return studentRepository.findByUserId(userId);
+    }
+
     public Student createStudent(Student students){
         return studentRepository.save(students);
     }
@@ -35,12 +39,15 @@ public class StudentService {
         st.setDateOfBirth(studentDetails.getDateOfBirth());
         st.setStudentEmail(studentDetails.getStudentEmail());
         st.setStudentPhone(studentDetails.getStudentPhone());
+        st.setAddress(studentDetails.getAddress());
+        st.setStudentClass(studentDetails.getStudentClass());
         st.setMajor(studentDetails.getMajor());
         st.setGpa(studentDetails.getGpa());
         return studentRepository.save(st);
     }
     public void deleteStudent(Long id) {
-        Student st = studentRepository.findById(id).get();
+        Student st = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
         studentRepository.delete(st);
     }
 
