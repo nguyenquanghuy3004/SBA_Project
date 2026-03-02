@@ -4,6 +4,7 @@ import com.example.project_web.entity.Role;
 import com.example.project_web.entity.Teacher;
 import com.example.project_web.entity.User;
 import com.example.project_web.enums.RoleName;
+import com.example.project_web.repository.NotificationRepository;
 import com.example.project_web.repository.RoleRepository;
 import com.example.project_web.repository.TeacherRepository;
 import com.example.project_web.repository.UserRepository;
@@ -32,6 +33,9 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public List<Teacher> getAllTeachers() {
@@ -92,6 +96,7 @@ public class TeacherServiceImpl implements TeacherService {
             User user = teacher.getUser();
             teacherRepository.delete(teacher);
             if (user != null) {
+                notificationRepository.deleteByUser(user);
                 userRepository.delete(user);
             }
         }

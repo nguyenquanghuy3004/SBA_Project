@@ -23,12 +23,16 @@ public class StudentValidator {
             throw new AppException("Tên sinh viên không được để trống");
         }
 
-        if (student.getStudentEmail() == null || !EMAIL_PATTERN.matcher(student.getStudentEmail()).matches()) {
-            throw new AppException("Email không hợp lệ");
+        if (student.getStudentEmail() != null && !student.getStudentEmail().trim().isEmpty()) {
+            if (!EMAIL_PATTERN.matcher(student.getStudentEmail()).matches()) {
+                throw new AppException("Email không hợp lệ");
+            }
         }
 
-        if (student.getStudentPhone() == null || !PHONE_PATTERN.matcher(student.getStudentPhone()).matches()) {
-            throw new AppException("Số điện thoại phải có đúng 10 chữ số (0-9)");
+        if (student.getStudentPhone() != null && !student.getStudentPhone().trim().isEmpty()) {
+            if (!PHONE_PATTERN.matcher(student.getStudentPhone()).matches()) {
+                throw new AppException("Số điện thoại phải có đúng 10 chữ số (0-9)");
+            }
         }
 
         if (student.getGpa() == null || student.getGpa() < 0 || student.getGpa() > 10) {

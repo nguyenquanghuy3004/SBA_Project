@@ -47,9 +47,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             }
         }
 
-        // 3. Check if already enrolled in this SPECIFIC class
-        if (enrollmentRepository.existsByStudentStudentIdAndSubjectClassId(student.getStudentId(), classId)) {
-            throw new AppException("Sinh viên đã đăng ký lớp học này rồi.");
+        // 3. New Business Rule: Check if already enrolled in this COURSE in this SEMESTER
+        if (enrollmentRepository.existsByStudentStudentIdAndSubjectClassCourseIdAndSubjectClassSemesterId(
+                student.getStudentId(), subjectClass.getCourse().getId(), subjectClass.getSemester().getId())) {
+            throw new AppException("Bạn đã đăng ký môn học '" + subjectClass.getCourse().getName() + "' trong học kỳ này rồi.");
         }
 
         // 3. New Business Rule: Check for Schedule Overlap
@@ -129,7 +130,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if (midterm != null) enrollment.setMidtermScore(midterm);
         if (finalScore != null) enrollment.setFinalScore(finalScore);
 
-        // Calculate total score (example weight: 10% attendance, 30% midterm, 60% final)
         if (enrollment.getAttendanceScore() != null && enrollment.getMidtermScore() != null && enrollment.getFinalScore() != null) {
             double total = (enrollment.getAttendanceScore() * 0.1) + 
                           (enrollment.getMidtermScore() * 0.3) + 
@@ -137,6 +137,34 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             enrollment.setTotalScore(total);
         }
 
-        return enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+
+        // Recalculate Student Overall GPA
+        recalculateStudentGPA(enrollment.getStudent());
+
+        return savedEnrollment;
+    }
+
+    private void recalculateStudentGPA(Student student) {
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentStudentId(student.getStudentId());
+        
+        double totalWeightedPoints = 0;
+        int totalCredits = 0;
+        int countWithGrades = 0;
+
+        for (Enrollment en : enrollments) {
+            if (en.getTotalScore() != null) {
+                int credits = en.getSubjectClass().getCourse().getCreadits();
+                totalWeightedPoints += (en.getTotalScore() * credits);
+                totalCredits += credits;
+                countWithGrades++;
+            }
+        }
+
+        if (totalCredits > 0) {
+            double finalGpa = totalWeightedPoints / totalCredits;
+            student.setGpa(finalGpa);
+            studentRepository.save(student);
+        }
     }
 }
