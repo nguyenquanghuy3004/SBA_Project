@@ -50,7 +50,7 @@ public class NotificationController {
     }
 
     @PostMapping("/class/{classId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_TEACHER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     public ResponseEntity<Void> notifyClass(
             @PathVariable Long classId,
             @RequestBody java.util.Map<String, String> body) {
@@ -61,7 +61,7 @@ public class NotificationController {
     // ===== ADMIN -> TEACHER NOTIFICATIONS =====
 
     @PostMapping("/teacher/{teacherId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> notifyTeacher(
             @PathVariable Long teacherId,
             @RequestBody java.util.Map<String, String> body) {
@@ -70,7 +70,7 @@ public class NotificationController {
     }
 
     @PostMapping("/all-teachers")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> notifyAllTeachers(
             @RequestBody java.util.Map<String, String> body) {
         notificationService.sendNotificationToAllTeachers(body.get("title"), body.get("message"));

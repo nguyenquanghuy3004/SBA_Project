@@ -46,8 +46,7 @@ public class TeacherController {
 
     @PutMapping("/update-me")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Teacher> updateMyProfile(@RequestBody Teacher teacher, 
-                                                 @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Teacher> updateMyProfile(@RequestBody Teacher teacher, @AuthenticationPrincipal UserDetails userDetails) {
         // Lấy thông tin user hiện tại
         User currentUser = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));

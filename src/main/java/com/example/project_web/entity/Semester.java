@@ -16,7 +16,7 @@ public class Semester {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false , columnDefinition = "NVARCHAR(255)")
     private String status; // OPEN_REGISTRATION, ONGOING, CLOSED
 
     public Semester() {}

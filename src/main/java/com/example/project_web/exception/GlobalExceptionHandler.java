@@ -4,6 +4,7 @@ package com.example.project_web.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,6 +13,13 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException e) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Bạn không có quyền thực hiện hành động này!");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<Map<String, String>> handleAppException(AppException e) {

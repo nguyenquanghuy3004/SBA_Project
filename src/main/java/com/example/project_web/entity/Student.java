@@ -17,6 +17,9 @@ public class Student {
     @Column(name = "student_id")
     private Long studentId;
 
+    @Column(name = "mssv", nullable = false, unique = true, length = 8)
+    private String mssv;
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -130,6 +133,14 @@ public class Student {
 
     public void setMajor(String major) {
         this.major = major;
+    }
+
+    public String getMssv() {
+        return mssv;
+    }
+
+    public void setMssv(String mssv) {
+        this.mssv = mssv;
     }
 
     public Double getGpa() {

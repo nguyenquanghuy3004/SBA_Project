@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class TeacherServiceImpl implements TeacherService {
@@ -60,14 +61,27 @@ public class TeacherServiceImpl implements TeacherService {
 
         // 2. Create User account for teacher
         User user = new User(username, email, passwordEncoder.encode(password));
-        Role teacherRole = roleRepository.findByName(RoleName.ROLE_TEACHER)
+        Role teacherRole = roleRepository.findByName(RoleName.TEACHER)
                 .orElseThrow(() -> new RuntimeException("Error: Role TEACHER not found."));
         user.setRoles(new HashSet<>(Collections.singletonList(teacherRole)));
         user = userRepository.save(user);
 
-        // 3. Link User to Teacher entity
+        // 3. Generate Teacher ID
+        teacher.setTeacherCode(generateTeacherCode());
+        
+        // 4. Link User to Teacher entity
         teacher.setUser(user);
         return teacherRepository.save(teacher);
+    }
+
+    private String generateTeacherCode() {
+        Random random = new Random();
+        String code;
+        do {
+            int number = random.nextInt(999) + 1; // 001 - 999
+            code = "TE" + String.format("%03d", number);
+        } while (teacherRepository.existsByTeacherCode(code));
+        return code;
     }
 
     @Override

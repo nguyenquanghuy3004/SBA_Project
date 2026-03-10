@@ -7,7 +7,18 @@ public class RegisterRequest {
     private String email;
     private String password;
     private String phone;
+    private String gender;
+    private String dateOfBirth;
+    private String address;
     private Set<String> role;
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public String getPhone() {
         return phone;
@@ -47,5 +58,21 @@ public class RegisterRequest {
 
     public void setRole(Set<String> role) {
         this.role = role;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

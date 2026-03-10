@@ -82,7 +82,7 @@ import java.util.Optional;
             String currentUsername = authentication.getName();
 
             // Nếu là SINH VIÊN (và không phải Admin/Teacher)
-            if (authorities.contains("ROLE_STUDENT") && !authorities.contains("ROLE_ADMIN") && !authorities.contains("ROLE_TEACHER")) {
+            if (authorities.contains("STUDENT") && !authorities.contains("ADMIN") && !authorities.contains("TEACHER")) {
                 
                 // Kiểm tra xem sinh viên này có đang sửa "chính mình" không?
                 if (existingStudent.getUser() == null || !existingStudent.getUser().getUsername().equals(currentUsername)) {

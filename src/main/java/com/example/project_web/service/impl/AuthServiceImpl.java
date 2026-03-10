@@ -12,6 +12,7 @@ import com.example.project_web.repository.RoleRepository;
 import com.example.project_web.repository.StudentRepository;
 import com.example.project_web.repository.UserRepository;
 import com.example.project_web.service.AuthService;
+import com.example.project_web.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +43,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    @Autowired
+    StudentService studentService;
 
     @Autowired
     PasswordEncoder encoder;
@@ -93,6 +98,19 @@ public class AuthServiceImpl implements AuthService {
                     .body("Error: Email is already in use!");
         }
 
+        // Kiểm tra thêm trùng lặp trong bảng Student
+        if (studentRepository.existsByStudentEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Error: This email is already assigned to another student!");
+        }
+
+        if (studentRepository.existsByStudentPhone(signUpRequest.getPhone())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Error: This phone number is already assigned to another student!");
+        }
+
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
@@ -102,26 +120,26 @@ public class AuthServiceImpl implements AuthService {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(RoleName.ROLE_STUDENT)
+            Role userRole = roleRepository.findByName(RoleName.STUDENT)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
-                        Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
+                        Role adminRole = roleRepository.findByName(RoleName.ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
 
                         break;
                     case "teacher":
-                        Role modRole = roleRepository.findByName(RoleName.ROLE_TEACHER)
+                        Role modRole = roleRepository.findByName(RoleName.TEACHER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(modRole);
 
                         break;
                     default:
-                        Role userRole = roleRepository.findByName(RoleName.ROLE_STUDENT)
+                        Role userRole = roleRepository.findByName(RoleName.STUDENT)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userRole);
                 }
@@ -132,17 +150,25 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
 
         // If the registered user is a student, create a Student profile
-        if (roles.stream().anyMatch(r -> r.getName().equals(RoleName.ROLE_STUDENT))) {
+        if (roles.stream().anyMatch(r -> r.getName().equals(RoleName.STUDENT))) {
             Student student = new Student();
             student.setUser(savedUser);
             student.setStudentName(savedUser.getUsername());
             student.setStudentEmail(savedUser.getEmail());
-            student.setGender("Other"); // Default
-            student.setDateOfBirth(java.time.LocalDate.of(2000, 1, 1)); // Default
+            student.setGender(signUpRequest.getGender()); // Lấy giới tính từ form đăng ký
+            
+            // Xử lý ngày sinh bảo mật hơn
+            if (signUpRequest.getDateOfBirth() != null && !signUpRequest.getDateOfBirth().isEmpty()) {
+                student.setDateOfBirth(LocalDate.parse(signUpRequest.getDateOfBirth()));
+            } else {
+                student.setDateOfBirth(LocalDate.of(2000, 1, 1)); // Default
+            }
+
+            student.setAddress(signUpRequest.getAddress()); // Lấy quê quán
             student.setStudentPhone(signUpRequest.getPhone()); 
             student.setMajor("None"); // Default
             student.setGpa(0.0);
-            studentRepository.save(student);
+            studentService.createStudent(student);
         }
 
         return ResponseEntity.ok("User registered successfully!");

@@ -1,6 +1,7 @@
 package com.example.project_web.config;
 
 import com.example.project_web.entity.Role;
+import com.example.project_web.entity.User;
 import com.example.project_web.enums.RoleName;
 import com.example.project_web.repository.RoleRepository;
 import com.example.project_web.repository.UserRepository;
@@ -33,12 +34,12 @@ public class DataInitializer implements CommandLineRunner {
             }
         });
 
-        // 2. Đảm bảo tài khoản "admin" luôn có quyền ROLE_ADMIN
-        com.example.project_web.entity.User admin = userRepository.findByUsername("admin").orElse(null);
-        Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN).get();
+        // 2. Đảm bảo tài khoản "admin" luôn có quyền ADMIN
+        User admin = userRepository.findByUsername("admin").orElse(null);
+        Role adminRole = roleRepository.findByName(RoleName.ADMIN).get();
 
         if (admin == null) {
-            admin = new com.example.project_web.entity.User("admin", "admin@gmail.com", passwordEncoder.encode("admin123"));
+            admin = new User("admin", "admin@gmail.com", passwordEncoder.encode("admin123"));
             admin.setRoles(new HashSet<>(Arrays.asList(adminRole)));
             userRepository.save(admin);
         } else {
