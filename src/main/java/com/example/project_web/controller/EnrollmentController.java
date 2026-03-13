@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/enrollments")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174", "http://localhost:5173"}, maxAge = 3600)
+@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:5174", "http://localhost:5173" }, maxAge = 3600)
 public class EnrollmentController {
 
     @Autowired
@@ -30,7 +30,8 @@ public class EnrollmentController {
     // Student cancels a registration
     @DeleteMapping("/cancel")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<Void> cancel(@RequestParam Long studentId, @RequestParam Long classId) {
+    public ResponseEntity<Void> cancel(@RequestParam("studentId") Long studentId,
+            @RequestParam("classId") Long classId) {
         enrollmentService.cancelEnrollment(studentId, classId);
         return ResponseEntity.noContent().build();
     }
@@ -38,14 +39,14 @@ public class EnrollmentController {
     // Get all enrollments (subjects) of a student
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'TEACHER')")
-    public ResponseEntity<List<Enrollment>> getStudentSubjects(@PathVariable Long studentId) {
+    public ResponseEntity<List<Enrollment>> getStudentSubjects(@PathVariable("studentId") Long studentId) {
         return ResponseEntity.ok(enrollmentService.getStudentEnrollments(studentId));
     }
 
     // Get all students in a class (Teacher view)
     @GetMapping("/class/{classId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<List<Enrollment>> getClassList(@PathVariable Long classId) {
+    public ResponseEntity<List<Enrollment>> getClassList(@PathVariable("classId") Long classId) {
         return ResponseEntity.ok(enrollmentService.getClassEnrollments(classId));
     }
 
@@ -53,14 +54,13 @@ public class EnrollmentController {
     @PutMapping("/grades/{enrollmentId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     public ResponseEntity<Enrollment> updateGrades(
-            @PathVariable Long enrollmentId,
+            @PathVariable("enrollmentId") Long enrollmentId,
             @RequestBody Map<String, Double> grades) {
-        
+
         return ResponseEntity.ok(enrollmentService.updateGrades(
                 enrollmentId,
                 grades.get("attendance"),
                 grades.get("midterm"),
-                grades.get("finalScore")
-        ));
+                grades.get("finalScore")));
     }
 }

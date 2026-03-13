@@ -7,4 +7,5 @@ import java.util.List;
 public interface SubjectClassRepository extends JpaRepository<SubjectClass, Long> {
     List<SubjectClass> findBySemesterId(Long semesterId);
     List<SubjectClass> findByTeacherId(Long teacherId);
+    boolean existsByCourseIdAndSemesterIdAndTeacherId(Long courseId, Long semesterId, Long teacherId);
 }

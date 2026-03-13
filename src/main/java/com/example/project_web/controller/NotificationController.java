@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -51,9 +52,7 @@ public class NotificationController {
 
     @PostMapping("/class/{classId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<Void> notifyClass(
-            @PathVariable Long classId,
-            @RequestBody java.util.Map<String, String> body) {
+    public ResponseEntity<Void> notifyClass( @PathVariable Long classId, @RequestBody java.util.Map<String, String> body) {
         notificationService.sendNotificationToClass(classId, body.get("title"), body.get("message"));
         return ResponseEntity.ok().build();
     }
@@ -62,17 +61,14 @@ public class NotificationController {
 
     @PostMapping("/teacher/{teacherId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> notifyTeacher(
-            @PathVariable Long teacherId,
-            @RequestBody java.util.Map<String, String> body) {
+    public ResponseEntity<Void> notifyTeacher( @PathVariable Long teacherId,@RequestBody java.util.Map<String, String> body) {
         notificationService.sendNotificationToTeacher(teacherId, body.get("title"), body.get("message"));
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/all-teachers")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> notifyAllTeachers(
-            @RequestBody java.util.Map<String, String> body) {
+    public ResponseEntity<Void> notifyAllTeachers( @RequestBody Map<String, String> body) {
         notificationService.sendNotificationToAllTeachers(body.get("title"), body.get("message"));
         return ResponseEntity.ok().build();
     }

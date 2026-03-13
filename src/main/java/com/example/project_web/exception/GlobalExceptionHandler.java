@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<Map<String, String>> handleAppException(AppException e) {
         Map<String, String> response = new HashMap<>();
+        response.put("message", e.getMessage());
         response.put("error", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -31,6 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> response = new HashMap<>();
+        response.put("message", e.getMessage());
         response.put("error", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -38,14 +40,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         Map<String, String> response = new HashMap<>();
-        response.put("error", "Dữ liệu đã tồn tại hoặc vi phạm ràng buộc hệ thống!");
+        response.put("message", "Dữ liệu đã tồn tại hoặc vi phạm ràng buộc hệ thống!");
+        response.put("error", "Conflict");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneralException(Exception e) {
         Map<String, String> response = new HashMap<>();
-        response.put("error", "Đã có lỗi hệ thống xảy ra: " + e.getMessage());
+        response.put("message", "Lỗi hệ thống: " + e.getMessage());
+        response.put("error", "Internal Server Error");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

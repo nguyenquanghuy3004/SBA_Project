@@ -23,12 +23,12 @@ public class SubjectClassController {
     }
 
     @GetMapping("/semester/{semesterId}")
-    public ResponseEntity<List<SubjectClass>> getBySemester(@PathVariable Long semesterId) {
+    public ResponseEntity<List<SubjectClass>> getBySemester(@PathVariable("semesterId") Long semesterId) {
         return ResponseEntity.ok(subjectClassService.getClassesBySemester(semesterId));
     }
 
     @GetMapping("/teacher/{userId}")
-    public ResponseEntity<List<SubjectClass>> getByTeacher(@PathVariable Long userId) {
+    public ResponseEntity<List<SubjectClass>> getByTeacher(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(subjectClassService.getClassesByTeacher(userId));
     }
 
@@ -40,20 +40,20 @@ public class SubjectClassController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SubjectClass> updateClass(@PathVariable Long id, @RequestBody SubjectClass subjectClass) {
+    public ResponseEntity<SubjectClass> updateClass(@PathVariable("id") Long id, @RequestBody SubjectClass subjectClass) {
         return ResponseEntity.ok(subjectClassService.updateClass(id, subjectClass));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteClass(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteClass(@PathVariable("id") Long id) {
         subjectClassService.deleteClass(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/lock")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<Void> lockClass(@PathVariable Long id, @RequestParam boolean lock) {
+    public ResponseEntity<Void> lockClass(@PathVariable("id") Long id, @RequestParam("lock") boolean lock) {
         subjectClassService.lockClass(id, lock);
         return ResponseEntity.ok().build();
     }

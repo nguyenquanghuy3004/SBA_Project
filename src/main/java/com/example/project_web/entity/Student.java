@@ -27,7 +27,7 @@ public class Student {
     @Column(name = "student_name", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String studentName;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender", nullable = false, columnDefinition = "NVARCHAR(50)")
     private String gender;
 
     @Column(name = "date_of_birthday", nullable = false)

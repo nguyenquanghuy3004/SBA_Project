@@ -39,9 +39,7 @@ import java.util.Optional;
         @GetMapping("/{id}")
         @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
         public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
-            return studentService.getStudentById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+            return studentService.getStudentById(id).map(ResponseEntity::ok) .orElse(ResponseEntity.notFound().build());
         }
 
 
@@ -61,8 +59,7 @@ import java.util.Optional;
             User currentUser = userRepository.findByUsername(currentUsername)
                     .orElseThrow(() -> new RuntimeException("User not found"));
             
-            return studentService.getStudentByUserId(currentUser.getId())
-                    .map(ResponseEntity::ok)
+            return studentService.getStudentByUserId(currentUser.getId()).map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         }
 
@@ -70,14 +67,14 @@ import java.util.Optional;
         @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
         public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Student student, Authentication authentication) {
             
-            // BƯỚC 1: Tìm sinh viên cũ trong database
+            //  Tìm sinh viên cũ trong database
             Optional<Student> studentOpt = studentService.getStudentById(id);
             if (studentOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sinh viên ID: " + id);
             }
             Student existingStudent = studentOpt.get();
 
-            // BƯỚC 2: Kiểm tra quyền chỉnh sửa
+            //  Kiểm tra quyền chỉnh sửa
             String authorities = authentication.getAuthorities().toString();
             String currentUsername = authentication.getName();
 
@@ -89,9 +86,16 @@ import java.util.Optional;
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn chỉ có quyền chỉnh sửa hồ sơ của chính mình!");
                 }
 
-                // Hạn chế: Sinh viên không được tự sửa Điểm (GPA) và Tên (nếu đã có)
-                student.setGpa(existingStudent.getGpa());
-                student.setStudentName(existingStudent.getStudentName());
+                // Hạn chế: Sinh viên không được tự ý sửa lại Tên và Điểm nếu ĐÃ CÓ
+                // Nếu chưa có (null hoặc rỗng) thì cho phép set lần đầu
+                if (existingStudent.getStudentName() != null && !existingStudent.getStudentName().trim().isEmpty()
+                    && !existingStudent.getStudentName().equalsIgnoreCase("None")) {
+                    student.setStudentName(existingStudent.getStudentName());
+                }
+
+                if (existingStudent.getGpa() != null && existingStudent.getGpa() > 0) {
+                    student.setGpa(existingStudent.getGpa());
+                }
                 
                 // Cho phép sửa Chuyên ngành và Lớp NẾU hiện tại đang là "None" hoặc trống
                 if (existingStudent.getMajor() != null && !existingStudent.getMajor().equalsIgnoreCase("None") 
@@ -106,7 +110,7 @@ import java.util.Optional;
                 }
             }
 
-            // BƯỚC 3: Validate và lưu dữ liệu
+            // Validate và lưu dữ liệu
             student.setStudentId(id);
             studentValidator.validate(student);
             
