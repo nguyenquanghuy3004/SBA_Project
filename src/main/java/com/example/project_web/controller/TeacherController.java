@@ -79,7 +79,7 @@ public class TeacherController {
     }
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Teacher> updateTeacher(@PathVariable Long id, @RequestBody Teacher teacherDetails){
+    public ResponseEntity<Teacher> updateTeacher(@PathVariable("id") Long id, @RequestBody Teacher teacherDetails){
         Teacher updateTeacher = teacherService.updateTeacher(id, teacherDetails);
         if(updateTeacher != null){
             return ResponseEntity.ok(updateTeacher);
@@ -90,7 +90,7 @@ public class TeacherController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteTeacher(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTeacher(@PathVariable("id") Long id) {
         teacherService.deleteTeacher(id);
         return ResponseEntity.ok().build();
     }

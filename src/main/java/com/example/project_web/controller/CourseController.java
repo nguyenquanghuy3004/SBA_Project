@@ -30,7 +30,7 @@ public class CourseController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Course> update(@PathVariable Long id, @RequestBody Course courseDetails) {
+    public ResponseEntity<Course> update(@PathVariable("id") Long id, @RequestBody Course courseDetails) {
         return courseRepository.findById(id)
                 .map(course -> {
                     course.setCourseCode(courseDetails.getCourseCode());
@@ -43,7 +43,7 @@ public class CourseController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         courseRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

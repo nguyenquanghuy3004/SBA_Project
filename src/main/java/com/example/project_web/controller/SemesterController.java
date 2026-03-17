@@ -30,14 +30,14 @@ public class SemesterController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Semester> update(@PathVariable Long id, @RequestBody Semester semester) {
+    public ResponseEntity<Semester> update(@PathVariable("id") Long id, @RequestBody Semester semester) {
         semester.setId(id);
         return ResponseEntity.ok(semesterRepository.save(semester));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         semesterRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

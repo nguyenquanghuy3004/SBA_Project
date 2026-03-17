@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table(name = "students")
-@JsonPropertyOrder({ "studentId", "user", "studentName", "gender", "dateOfBirth", "studentEmail", "studentPhone", "address", "studentClass", "major", "gpa" })
+@JsonPropertyOrder({ "studentId", "user", "studentName", "gender", "dateOfBirth", "studentEmail", "studentPhone", "address", "classroom", "major", "gpa" })
 public class Student {
 
     @Id
@@ -42,8 +42,9 @@ public class Student {
     @Column(name = "address", columnDefinition = "NVARCHAR(255)")
     private String address;
 
-    @Column(name = "student_class", columnDefinition = "NVARCHAR(50)")
-    private String studentClass;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "classroom_id")
+    private Classroom classroom;
 
     @Column(name = "major", nullable = false, columnDefinition = "NVARCHAR(255)")
     private String major;
@@ -63,12 +64,12 @@ public class Student {
         this.address = address;
     }
 
-    public String getStudentClass() {
-        return studentClass;
+    public Classroom getClassroom() {
+        return classroom;
     }
 
-    public void setStudentClass(String studentClass) {
-        this.studentClass = studentClass;
+    public void setClassroom(Classroom classroom) {
+        this.classroom = classroom;
     }
 
     public Long getStudentId() {

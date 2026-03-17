@@ -81,7 +81,7 @@ public class StudentService {
         st.setStudentEmail(studentDetails.getStudentEmail());
         st.setStudentPhone(studentDetails.getStudentPhone());
         st.setAddress(studentDetails.getAddress());
-        st.setStudentClass(studentDetails.getStudentClass());
+        st.setClassroom(studentDetails.getClassroom());
         st.setMajor(studentDetails.getMajor());
         st.setGpa(studentDetails.getGpa());
         return studentRepository.save(st);

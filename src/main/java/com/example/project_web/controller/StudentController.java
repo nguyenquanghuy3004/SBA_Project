@@ -38,7 +38,7 @@ import java.util.Optional;
 
         @GetMapping("/{id}")
         @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-        public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
+        public ResponseEntity<Student> getStudentById(@PathVariable("id") Long id) {
             return studentService.getStudentById(id).map(ResponseEntity::ok) .orElse(ResponseEntity.notFound().build());
         }
 
@@ -65,7 +65,7 @@ import java.util.Optional;
 
         @PutMapping("/update/{id}")
         @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
-        public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody Student student, Authentication authentication) {
+        public ResponseEntity<?> updateStudent(@PathVariable("id") Long id, @RequestBody Student student, Authentication authentication) {
             
             //  Tìm sinh viên cũ trong database
             Optional<Student> studentOpt = studentService.getStudentById(id);
@@ -97,17 +97,14 @@ import java.util.Optional;
                     student.setGpa(existingStudent.getGpa());
                 }
                 
-                // Cho phép sửa Chuyên ngành và Lớp NẾU hiện tại đang là "None" hoặc trống
+                // Cho phép sửa Chuyên ngành NẾU hiện tại đang là "None" hoặc trống
                 if (existingStudent.getMajor() != null && !existingStudent.getMajor().equalsIgnoreCase("None") 
                     && !existingStudent.getMajor().equalsIgnoreCase("Chưa cập nhật")) {
                     student.setMajor(existingStudent.getMajor());
                 }
                 
-                if (existingStudent.getStudentClass() != null && !existingStudent.getStudentClass().equalsIgnoreCase("None")
-                    && !existingStudent.getStudentClass().equalsIgnoreCase("Chưa cập nhật")
-                    && !existingStudent.getStudentClass().isEmpty()) {
-                    student.setStudentClass(existingStudent.getStudentClass());
-                }
+                // Sinh viên không được phép tự ý đổi lớp sinh hoạt
+                student.setClassroom(existingStudent.getClassroom());
             }
 
             // Validate và lưu dữ liệu
@@ -121,7 +118,7 @@ import java.util.Optional;
 
         @DeleteMapping("/delete/{id}")
         @PreAuthorize("hasRole('ADMIN')")
-        public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+        public ResponseEntity<Void> deleteStudent(@PathVariable("id") Long id) {
             studentService.deleteStudent(id);
             return ResponseEntity.noContent().build();
         }
