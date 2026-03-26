@@ -30,8 +30,7 @@ public class EnrollmentController {
     // Student cancels a registration
     @DeleteMapping("/cancel")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<Void> cancel(@RequestParam("studentId") Long studentId,
-            @RequestParam("classId") Long classId) {
+    public ResponseEntity<Void> cancel(@RequestParam("studentId") Long studentId, @RequestParam("classId") Long classId) {
         enrollmentService.cancelEnrollment(studentId, classId);
         return ResponseEntity.noContent().build();
     }

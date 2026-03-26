@@ -1,6 +1,6 @@
 package com.example.project_web.config;
 
-import io.jsonwebtoken.*; 
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -16,9 +16,9 @@ import java.util.Date;
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
-    // Hardcoded for demo/student project simplicity. 
+    // Hardcoded for demo/student project simplicity.
     // In production, put this in application.properties
-    private final String jwtSecret = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"; 
+    private final String jwtSecret = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
     private final long jwtExpirationMs = 86400000; // 1 day
 
     public String generateToken(Authentication authentication) {
@@ -38,7 +38,7 @@ public class JwtProvider {
 
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key()).build()
-               .parseClaimsJws(token).getBody().getSubject();
+                .parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean validateJwtToken(String authToken) {
