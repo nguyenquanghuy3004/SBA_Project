@@ -86,7 +86,7 @@ import java.util.Optional;
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Bạn chỉ có quyền chỉnh sửa hồ sơ của chính mình!");
                 }
 
-                // Hạn chế: Sinh viên không được tự ý sửa lại Tên và Điểm nếu ĐÃ CÓ
+                //  Sinh viên không được tự ý sửa lại Tên và Điểm nếu ĐÃ CÓ
                 // Nếu chưa có (null hoặc rỗng) thì cho phép set lần đầu
                 if (existingStudent.getStudentName() != null && !existingStudent.getStudentName().trim().isEmpty()
                     && !existingStudent.getStudentName().equalsIgnoreCase("None")) {
@@ -97,17 +97,17 @@ import java.util.Optional;
                     student.setGpa(existingStudent.getGpa());
                 }
                 
-                // Cho phép sửa Chuyên ngành NẾU hiện tại đang là "None" hoặc trống
+
                 if (existingStudent.getMajor() != null && !existingStudent.getMajor().equalsIgnoreCase("None") 
                     && !existingStudent.getMajor().equalsIgnoreCase("Chưa cập nhật")) {
                     student.setMajor(existingStudent.getMajor());
                 }
                 
-                // Sinh viên không được phép tự ý đổi lớp sinh hoạt
+
                 student.setClassroom(existingStudent.getClassroom());
             }
 
-            // Validate và lưu dữ liệu
+
             student.setStudentId(id);
             studentValidator.validate(student);
             

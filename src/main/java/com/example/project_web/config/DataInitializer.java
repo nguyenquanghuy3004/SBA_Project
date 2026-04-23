@@ -27,14 +27,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. Khởi tạo các Role cơ bản
+
         Arrays.stream(RoleName.values()).forEach(roleName -> {
             if (roleRepository.findByName(roleName).isEmpty()) {
                 roleRepository.save(new Role(roleName));
             }
         });
 
-        // 2. Đảm bảo tài khoản "admin" luôn có quyền ADMIN
+
         User admin = userRepository.findByUsername("admin").orElse(null);
         Role adminRole = roleRepository.findByName(RoleName.ADMIN).get();
 
@@ -43,7 +43,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setRoles(new HashSet<>(Arrays.asList(adminRole)));
             userRepository.save(admin);
         } else {
-            // Nếu đã tồn tại nhưng sai quyền, cập nhật lại quyền Admin
+
             if (!admin.getRoles().contains(adminRole)) {
                 admin.setRoles(new HashSet<>(Arrays.asList(adminRole)));
                 userRepository.save(admin);

@@ -16,10 +16,8 @@ import java.util.Date;
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
-    // Hardcoded for demo/student project simplicity.
-    // In production, put this in application.properties
     private final String jwtSecret = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
-    private final long jwtExpirationMs = 86400000; // 1 day
+    private final long jwtExpirationMs = 86400000; // 1 ngày
 
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
