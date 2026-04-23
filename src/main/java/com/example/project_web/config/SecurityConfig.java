@@ -84,8 +84,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Cho phép Frontend của bạn truy cập
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost"));
+        // Cho phép Frontend của bạn truy cập (cả máy nhà và trên mạng)
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost", 
+            "https://sbaprojectfrontend-production.up.railway.app"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
         configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
